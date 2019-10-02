@@ -312,16 +312,16 @@ export default {
         proyector: true
       },
       details: {
-        curso: "",
-        codigo: "",
-        aula: "",
-        docente: "",
-        semestre: "",
-        tema: "",
-        software: "",
-        avance: "",
-        fecha: "",
-        proyector: ""
+        curso: '',
+        codigo: '',
+        aula: '',
+        docente: '',
+        semestre: '',
+        tema: '',
+        software: '',
+        avance: '',
+        fecha: '',
+        proyector: ''
       },
       proyectorItems: [
         { value: true, text: "Si" },
@@ -360,34 +360,34 @@ export default {
   },
   methods: {
     changeStatus(i) {
-      this.students[i].signature = !this.students[i].signature;
+      this.students[i].signature = !this.students[i].signature
     },
     toogleInputs() {
-      this.disabled = !this.disabled;
-      this.loadingBtn = !this.loadingBtn;
+      this.disabled = !this.disabled
+      this.loadingBtn = !this.loadingBtn
     },
     saveChanges() {
       if (!this.$refs.form.validate()) {
-        return;
+        return
       }
       this.toogleInputs();
-      this.header.curso = this.details.curso;
-      this.header.codigo = this.details.codigo;
-      this.header.aula = this.details.aula;
-      this.header.docente = this.details.docente;
-      this.header.semestre = this.details.semestre.text;
-      this.header.tema = this.details.tema;
-      this.header.software = this.details.software;
-      this.header.avance = this.details.avance;
-      this.header.fecha = this.details.fecha;
-      this.header.proyector = this.details.proyector;
-      this.toogleInputs();
-      this.dialog = false;
+      this.header.curso = this.details.curso
+      this.header.codigo = this.details.codigo
+      this.header.aula = this.details.aula
+      this.header.docente = this.details.docente
+      this.header.semestre = this.details.semestre.text
+      this.header.tema = this.details.tema
+      this.header.software = this.details.software
+      this.header.avance = this.details.avance
+      this.header.fecha = this.details.fecha
+      this.header.proyector = this.details.proyector
+      this.toogleInputs()
+      this.dialog = false
       this.snackbarMutation({
         value: true,
         color: "green",
         text: "Datos actualziados satisfactoriamente"
-      });
+      })
     },
     ...mapMutations(["snackbarMutation"])
   },
