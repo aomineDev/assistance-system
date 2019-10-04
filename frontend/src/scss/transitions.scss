@@ -1,0 +1,22 @@
+.move-enter-active,
+.move-leave-active {
+  transform: translateY(0);
+  transition: all .3s linear;
+}
+
+.move-enter, 
+.move-leave-to {
+  transform: translateY(-100%);
+}
+
+.fade {
+  &-enter-active,
+  &-leave-active {
+    transition: .3s;
+  }
+
+  &-enter, 
+  &-leave-to {
+    opacity: 0;
+  }
+}

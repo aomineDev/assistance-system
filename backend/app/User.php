@@ -38,10 +38,6 @@ class User extends Authenticatable
     ];
 
     public function persona() {
-        return $this->hasOne('App\Persona');
-    }
-
-    public function curso() {
-        return $this->hasMany('App\DocenteCurso');
+        return $this->belongsTo('App\Persona');
     }
 }

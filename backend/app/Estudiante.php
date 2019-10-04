@@ -10,7 +10,7 @@ class Estudiante extends Model
     protected $table = 'estudiantes';
 
     public function persona() {
-        return $this->hasOne('App\Persona');
+        return $this->belongsTo('App\Persona');
     }
 
     public function semestre() {

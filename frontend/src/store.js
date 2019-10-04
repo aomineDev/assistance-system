@@ -5,10 +5,17 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    // drawer
     drawerState: false,
+    // snackbar
     snackbarState: false,
     color: '',
-    text: ''
+    text: '',
+    // api
+    baseUrl: 'http://localhost:8000/api',
+    user: {
+      nombre_completo: 'aomine Daiki'
+    }
   },
   mutations: {
     drawerMutation (state, value) {
@@ -18,9 +25,17 @@ export default new Vuex.Store({
       state.snackbarState = value
       state.color = color
       state.text = text
+    },
+    userMutation (state, object) {
+      state.user = object
     }
   },
   actions: {
 
+  },
+  getters: {
+    getBaseUrl (state) {
+      return state.baseUrl
+    }
   }
 })
