@@ -1,11 +1,16 @@
 import axios from 'axios'
 import store from '@/store'
 
-const config = axios.create({
+export const service = axios.create({
   baseURL: store.getters.getBaseUrl,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-export default config
+export const auth = axios.create({
+  baseURL: `${store.getters.getBaseUrl}/auth`,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})

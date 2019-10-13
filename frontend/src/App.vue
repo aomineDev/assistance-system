@@ -1,38 +1,53 @@
 <template>
   <v-app>
-    <navbar />
-    <sidenav />
-
-    <v-content>
-      <router-view/>
-    </v-content>
+    <transition name="fade">
+      <LoaderInitial v-if="isLoading" />
+    </transition>
+    <template v-if="!isLoading">
+      <transition name="fade">
+        <router-view />
+      </transition>
+    </template>
   </v-app>
 </template>
 
 <script>
 import { mapMutations } from 'vuex'
-import authService from '@/services/auth'
-import '@/scss/transitions.scss'
 
-import Navbar from '@/components/layout/Navbar'
-import Sidenav from '@/components/layout/Sidenav'
+// eslint-disable-next-line
+import service from '@/services/service'
+
+import LoaderInitial from '@/components/shared/LoaderInitial'
+
+import '@/scss/transitions.scss'
 
 export default {
   name: 'App',
   components: {
-    Navbar,
-    Sidenav
+    LoaderInitial
+  },
+  data () {
+    return {
+      isLoading: true
+    }
   },
   methods: {
-    async login (id) {
-      const { data } = await authService.login(id)
-      this.userMutation(data)
-      console.log(data)
+    async getUser () {
+      const data = window.sessionStorage.getItem('credentials')
+      this.isLoading = false
+      if (data) {
+        this.userMutation(data)
+        console.log('alv puta mare k fueeee :\'V')
+        // this.$router.push('/')
+      } else {
+        console.log('goto')
+        // this.$router.push({ name: 'login' })
+      }
     },
     ...mapMutations(['userMutation'])
   },
   created () {
-    this.login(1)
+    this.getUser()
   }
 }
 </script>

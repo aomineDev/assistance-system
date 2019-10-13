@@ -1,8 +1,8 @@
-import service from './service'
+import { auth } from './service'
 
 const authService = {
-  login: id => {
-    return service.get(`/user/${id}`)
+  login: credentials => {
+    return auth.post(`/login`, credentials)
   }
 }
 

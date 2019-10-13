@@ -7,23 +7,21 @@ use App\EstudianteCurso;
 
 class EstudianteCursoController extends Controller
 {
-    public function index($id) {
+    public function getCursosByEstudiante($id) {
         $estudianteCursos = EstudianteCurso::where('estudiante_id', $id)->get();
-        $allEstudiantesCursos = [];
-
+        $allEstudianteCursos = [];
         foreach($estudianteCursos as $item) {
-            $estudiante = $item->estudiante;
             $curso = $item->curso;
-
+            $estudiante = $item->estudiante;
+            $docente = $curso->docente;
             $response = [
-                'id' => $item->id,
-                'estudiante' => $estudiante->persona->nombre_completo,
-                'curso' => $curso->nombre
+                'curso_id' => $curso->id,
+                'nombre' => $curso->nombre,
+                'docente_id' => $docente->id,
+                'docente' => $docente->persona->nombre_completo
             ];
-
-            array_push($allEstudiantesCursos, $response);
-        };
-
-        return $allEstudiantesCursos;
+            array_push($allEstudianteCursos, $response);
+        }
+        return $allEstudianteCursos;
     }
 }

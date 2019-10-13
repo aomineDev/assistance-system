@@ -11,4 +11,12 @@ class Asistencia extends Model
     public function curso() {
         return $this->belongsTo('App\Curso');
     }
+
+    public function docente() {
+        return $this->belongsTo('App\Docente');
+    }
+
+    public function estudiantes() {
+        return $this->hasMany('App\EstudianteAsistencia', 'asistencia_id');
+    }
 }

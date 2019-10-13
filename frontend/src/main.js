@@ -9,7 +9,10 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 
+import formatDate from './filters/formatDate'
+
 Vue.use(VueAxios, axios)
+Vue.use(formatDate)
 
 Vue.config.productionTip = false
 

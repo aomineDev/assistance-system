@@ -11,4 +11,8 @@ class Curso extends Model
     public function semestre() {
         return $this->belongsTo('App\Semestre');
     }
+
+    public function docente() {
+        return $this->belongsTo('App\Docente');
+    }
 }
