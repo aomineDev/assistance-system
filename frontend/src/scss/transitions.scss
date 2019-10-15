@@ -1,4 +1,4 @@
-.move {
+.slideY {
   &-enter-active,
   &-leave-active {
     transform: translateY(50px);
@@ -55,5 +55,29 @@
   }
   &-enter-to {
     transform: scale(1) rotate(0);
+  }
+}
+
+.scale-page {
+  &-enter-active,
+  &-leave-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: all .2s linear;
+  }
+  &-enter-active {
+    transition-delay: .25s;
+  }
+  &-leave-to,
+  &-enter {
+    transform: scale(1.5);
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  &-enter-to {
+    transform: scale(1);
   }
 }

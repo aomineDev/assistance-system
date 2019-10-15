@@ -18,9 +18,9 @@
         <h1 class="display-1">Asistencia</h1>
         <v-switch v-model="enabled" inset :disabled="disabledEnabled">
           <template v-slot:label>
-            Habilitar Asistencia
+            {{ enabled ? 'Asistencia habilitada' : 'Asistencia desabilitada' }}
             <v-progress-circular
-            v-show="loadingEnabled"
+              v-show="loadingEnabled"
               :indeterminate="loadingEnabled"
               :value="0"
               size="24"
@@ -76,7 +76,7 @@
 
           <div v-for="(student, i) of students" :key="student.id">
             <v-row align="center">
-              <v-col cols="1" class="text-center">{{ i | number }}</v-col>
+              <v-col cols="1" class="text-center">{{ i | getIndex }}</v-col>
               <v-col cols="2">{{ student.codigo }}</v-col>
               <v-col :cols="nombre">{{ student.nombre }}</v-col>
               <v-col :cols="notas" class="" v-show="notas">
@@ -85,7 +85,9 @@
                   single-line
                   v-mask="'##'"
                   counter
+                  v-model="student.nota"
                   :rules="[rules.notas]"
+                  @input="handleNotas"
                 ></v-text-field>
               </v-col>
               <v-col :cols="nEquipo" class="text-center" v-show="nEquipo">{{ student.firma }}</v-col>
@@ -251,7 +253,6 @@
           bottom
           right
           direction="top"
-          open-on-hover
           transition="slide-y-reverse-transition"
           v-show="observer"
         >
@@ -259,8 +260,8 @@
             <v-btn
               v-model="fab"
               color="blue"
-              dark
               fab
+              dark
               large
               :loading="loadingFloatBtn"
             >
@@ -279,33 +280,42 @@
           </v-btn>
           <v-btn
             fab
-            dark
             small
-            color="red"
+            color="red white--text"
+            :disabled="notaDisabled"
             @click="toogleNotas"
           >
             <v-icon>assignment</v-icon>
+          </v-btn>
+          <v-btn
+            fab
+            dark
+            small
+            color="purple"
+            @click="refresh"
+          >
+            <v-icon>refresh</v-icon>
           </v-btn>
         </v-speed-dial>
 
         <v-btn
           :key="'button'"
-          color="green"
+          color="green white--text"
           fixed
           fab
           large
-          dark
           bottom
           right
           @click="sure = true"
           :loading="loadingFloatBtn"
+          :disabled="notaValid"
           v-show="!observer"
         >
           <v-icon>check</v-icon>
         </v-btn>
       </transition-group>
 
-      <transition name="move">
+      <transition name="slideY">
         <alert />
       </transition>
 
@@ -314,7 +324,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { mask } from 'vue-the-mask'
 
 import asistenciasService from '@/services/asistencias'
@@ -384,7 +394,11 @@ export default {
       // Switch enabled/disabled
       enabled: false,
       loadingEnabled: false,
-      disabledEnabled: false
+      disabledEnabled: false,
+      enabledMarker: true,
+      // Notas
+      notaValid: false,
+      notaDisabled: false
     }
   },
   methods: {
@@ -396,33 +410,81 @@ export default {
         this.students = data.students
         this.trueStudents = data.trueStudents
         this.date = this.header.fecha
+        this.enabled = this.header.habilitado
 
         this.assignDetails()
         this.saveAsistenciasBup()
 
-        // if (true) {
-        this.assignCols(5, 0, 2, 1, 1)
-        // } else {
-        // this.assignCols(5, 0, 0, 2, 2)
-        // }
+        if (this.header.laboratorio) {
+          this.assignCols(5, 0, 2, 1, 1)
+        } else {
+          this.assignCols(5, 0, 0, 2, 2)
+        }
+
+        this.verifyNotas()
       } catch (error) {
-        this.snackbarMutation({
-          value: true,
-          color: 'red',
-          text: 'Error al traer los datos'
-        })
+        this.handleTokenError()
       } finally {
         this.isLoading = false
       }
     },
-    // ENABLED ASITENCIA
-    enabledAsistencia () {
-      this.enabledToogle()
-      // this.enabledToogle()
+    // Refresh
+    async refresh () {
+      try {
+        this.isLoading = true
+        const { data } = await asistenciasService.getAsitencia(this.asistenciaId)
+        this.students = data.students
+        this.trueStudents = data.trueStudents
+        this.saveAsistenciasBup()
+        this.verifyNotas()
+      } catch (error) {
+        this.handleTokenError()
+      } finally {
+        this.isLoading = false
+      }
     },
-    disabledAsistencia () {
-      this.enabledToogle()
-      this.enabledToogle()
+    // Verifications
+    verifyNotas () {
+      const notasExist = this.students.some(e => e.nota !== null)
+      if (this.notaDisabled) {
+        this.toogleNotas()
+        this.notaDisabled = false
+      }
+      if (notasExist) {
+        this.toogleNotas()
+        this.notaDisabled = true
+      }
+    },
+    // ENABLED ASITENCIA
+    async enabledAsistencia () {
+      try {
+        this.enabledToogle()
+        await asistenciasService.enabledToggle(1, this.header.id)
+        this.snackbarMutation({
+          value: true,
+          color: 'green',
+          text: 'Asistencia habilitada satisfactoriamente'
+        })
+      } catch (error) {
+        this.handleTokenError()
+      } finally {
+        this.enabledToogle()
+      }
+    },
+    async disabledAsistencia () {
+      try {
+        this.enabledToogle()
+        await asistenciasService.enabledToggle(0, this.header.id)
+        this.snackbarMutation({
+          value: true,
+          color: 'green',
+          text: 'Asistencia desabilitada correctamente'
+        })
+      } catch (error) {
+        this.handleTokenError()
+      } finally {
+        this.enabledToogle()
+      }
     },
     enabledToogle () {
       this.disabledEnabled = !this.disabledEnabled
@@ -457,16 +519,21 @@ export default {
           text: 'Datos actualziados satisfactoriamente'
         })
       } catch (error) {
-        this.snackbarMutation({
-          value: true,
-          color: 'red',
-          text: 'Error al actulizar los datos en el servidor'
-        })
+        this.handleTokenError()
       } finally {
         this.toggleInputs()
       }
     },
     // NOTAS
+    handleNotas (value) {
+      this.observer = false
+      if (this.notaValid) {
+        this.notaValid = false
+      }
+      if (value > 20) {
+        this.notaValid = true
+      }
+    },
     toogleNotas () {
       if (this.notas) {
         this.assignCols(5, 0)
@@ -504,6 +571,7 @@ export default {
     async saveFirmas () {
       try {
         this.saveAsistenciasBup()
+        console.log(this.students)
         // Generate object de firmas
         let i = 0
         const firmas = this.trueStudents.reduce(function (obj, elem) {
@@ -523,11 +591,7 @@ export default {
           text: 'Asistencias actualizadas correctamente'
         })
       } catch (error) {
-        this.snackbarMutation({
-          value: true,
-          color: 'red',
-          text: 'Error en el servidor'
-        })
+        this.handleTokenError()
       } finally {
         this.loadingFloatBtn = false
         this.observer = true
@@ -557,6 +621,19 @@ export default {
       this.firma = firma
       this.action = action
     },
+    handleTokenError () {
+      this.snackbarMutation({
+        value: true,
+        color: 'red',
+        text: 'El Token ha expirado'
+      })
+      setTimeout(this.logoutAndGoToLogin, 3200)
+    },
+    async logoutAndGoToLogin () {
+      await this.logout()
+      this.$router.push({ name: 'login' })
+    },
+    ...mapActions(['logout']),
     ...mapMutations(['snackbarMutation'])
   },
   computed: {
@@ -575,16 +652,16 @@ export default {
       }
     },
     enabled (value) {
+      if (this.enabledMarker) {
+        this.enabledMarker = false
+        return
+      }
+
       if (value) {
         this.enabledAsistencia()
       } else {
         this.disabledAsistencia()
       }
-    }
-  },
-  filters: {
-    number (value) {
-      return ++value
     }
   },
   created () {

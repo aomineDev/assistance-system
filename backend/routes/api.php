@@ -19,11 +19,14 @@ Route::group(['middleware' => ['cors', 'jwt']], function(){
     Route::get('/cursos/estudiante/{id}', 'EstudianteCursoController@getCursosByEstudiante');
 
     // Asistencias GET
-    Route::get('/asistencias/{curso_id}/{docente_id}', 'AsistenciaController@getAsistenciasByCurso');
+    Route::get('/asistencias/curso/{curso_id}/{docente_id}', 'AsistenciaController@getAsistenciasByCurso');
+    Route::get('/asistencias/estudiante/{curso_id}/{docente_id}', 'AsistenciaController@getAsistenciasByEstudiantes');
     Route::get('/asistencia/{id}', 'AsistenciaController@getAsistencia');
     // Asistencias OPTIONS
     Route::put('/details/update', 'AsistenciaController@updateDetails');
-    Route::put('/firmas/update/{id}', 'EstudianteAsistenciaController@updateAsistencia');
+    Route::put('/details/habilitar/{id}', 'AsistenciaController@enabledToggle');
+    Route::put('/firmas/update/{id}', 'EstudianteAsistenciaController@updateAsistencias');
+    Route::put('/firma/update/{id}', 'EstudianteAsistenciaController@updateAsistencia');
 });
 
 Route::group([

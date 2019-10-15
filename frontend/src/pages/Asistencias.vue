@@ -16,7 +16,20 @@
           <v-icon>keyboard_arrow_left</v-icon>
         </v-btn>
         <h1>Lista de Asistencias</h1>
-        <div></div>
+        <div v-show="isStudent">
+          Porcentaje de Asistencia
+          <v-progress-circular
+            :rotate="-90"
+            :size="55"
+            :width="3"
+            :value="porcentaje"
+            :color="porcentajeColor"
+            class="ml-2"
+          >
+            {{ porcentaje }}%
+          </v-progress-circular>
+        </div>
+        <div v-show="!isStudent"></div>
       </section>
 
       <v-list two-line subheader color="background">
@@ -65,15 +78,35 @@
         </template>
       </v-list>
     </template>
+
+    <v-btn
+      fixed
+      bottom
+      right
+      fab
+      dark
+      color="blue"
+      @click="refresh"
+      :loading="loadingFloatBtn"
+    >
+      <v-icon>refresh</v-icon>
+    </v-btn>
+
+    <transition name="slideY">
+      <alert />
+    </transition>
   </v-container>
 </template>
 
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex'
+
+import Alert from '@/components/shared/Alert'
 import LoaderFulPage from '@/components/shared/LoaderFullPage'
 
 export default {
   components: {
+    Alert,
     LoaderFulPage
   },
   data () {
@@ -81,8 +114,15 @@ export default {
       enableAsistencias: [],
       disableAsistencias: [],
       id: null,
+      docenteId: 0,
       isLoading: true,
-      now: new Date().toISOString().substr(0, 10)
+      loadingFloatBtn: false,
+      now: new Date().toISOString().substr(0, 10),
+      porcentaje: 0,
+      porcentajeTotal: 0,
+      porcentajeIndex: 0,
+      porcentajeColor: '',
+      isStudent: false
     }
   },
   methods: {
@@ -92,19 +132,48 @@ export default {
 
         await this.verifyParams()
 
-        if (this.asistencias.length === 0) {
-          await this.getAsistencias(this.id)
-        } else {
-          if (this.asistencias[0].curso_id !== this.id) {
-            await this.getAsistencias(this.id)
-          }
+        const response = this.cursos.find(e => e.curso_id === this.id)
+        this.docenteId = response.docente_id
+
+        const config = {
+          cursoId: this.id,
+          docenteId: this.docenteId
         }
 
+        if (this.asistencias.length === 0) {
+          await this.getAsistencias(config)
+        } else {
+          if (this.asistencias[0].curso_id !== this.id) {
+            await this.getAsistencias(config)
+          }
+        }
+        this.assignPorcentaje()
         this.assignAsistencias()
       } catch (error) {
-        console.log(error)
+        this.handleTokenError()
       } finally {
         this.isLoading = false
+      }
+    },
+    // Refresh asistencias
+    async refresh () {
+      try {
+        this.isLoading = true
+        this.loadingFloatBtn = true
+        const config = {
+          cursoId: this.id,
+          docenteId: this.docenteId
+        }
+
+        await this.getAsistencias(config)
+
+        this.assignPorcentaje()
+        this.assignAsistencias()
+      } catch (error) {
+        this.handleTokenError()
+      } finally {
+        this.isLoading = false
+        this.loadingFloatBtn = false
       }
     },
     // Verify
@@ -120,11 +189,42 @@ export default {
           this.$router.push({ name: 'notFound' })
         }
       } catch (error) {
-        console.log(error)
+        this.handleTokenError()
       }
     },
     // Assigns
+    assignPorcentaje () {
+      if (this.user.rol === 'estudiante') {
+        this.porcentajeTotal = 0
+        this.porcentajeIndex = 0
+        this.allAsistencias.forEach(({ estudiante }) => {
+          this.porcentajeTotal++
+          if (estudiante.firma) {
+            this.porcentajeIndex++
+          }
+        })
+
+        this.porcentaje = Math.round((this.porcentajeIndex * 100) / this.porcentajeTotal)
+
+        if (this.porcentaje <= 35) {
+          this.porcentajeColor = 'red'
+        }
+        if (this.porcentaje > 35) {
+          this.porcentajeColor = 'green'
+        }
+        if (this.porcentaje >= 70) {
+          this.porcentajeColor = 'blue'
+        }
+        this.isStudent = true
+      }
+    },
     assignAsistencias () {
+      if (!this.asistencias.length) {
+        this.enableAsistencias = []
+        this.disableAsistencias = []
+        return
+      }
+
       const nowArr = this.now.split('-')
       const yearNow = parseInt(nowArr[0])
       const monthNow = parseInt(nowArr[1])
@@ -162,13 +262,32 @@ export default {
     },
     goToAsistencia (id) {
       this.asistenciaIdMutation(id)
-      this.$router.push({ name: 'asistencia' })
+      if (this.user.rol === 'docente') {
+        this.$router.push({ name: 'asistenciaDocente' })
+        return
+      }
+
+      if (this.user.rol === 'estudiante') {
+        this.$router.push({ name: 'asistenciaEstudiante' })
+      }
     },
-    ...mapMutations(['asistenciaIdMutation']),
-    ...mapActions(['getAsistencias', 'getCursos'])
+    handleTokenError () {
+      this.snackbarMutation({
+        value: true,
+        color: 'red',
+        text: 'El Token ha expirado'
+      })
+      setTimeout(this.logoutAndGoToLogin, 3200)
+    },
+    async logoutAndGoToLogin () {
+      await this.logout()
+      this.$router.push({ name: 'login' })
+    },
+    ...mapMutations(['asistenciaIdMutation', 'snackbarMutation']),
+    ...mapActions(['getAsistencias', 'getCursos', 'logout'])
   },
   computed: {
-    ...mapState(['asistencias', 'cursos'])
+    ...mapState(['allAsistencias', 'asistencias', 'cursos', 'user'])
   },
   created () {
     this.init()

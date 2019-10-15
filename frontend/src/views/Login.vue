@@ -66,7 +66,7 @@
 
     <div class="Fis-sky">
       <div class="Fis-wave"></div>
-      <div v-for="(n, index) in starts" :class="`Star s${index + 1}`" :key="n"></div>
+      <div v-for="(n, index) in starts" :class="`Star Star-s${index + 1}`" :key="n"></div>
     </div>
 
     <div class="Fis">
@@ -76,7 +76,7 @@
       <div class="Fis-waveBox">
         <div class="Fis-wave"></div>
       </div>
-      <div v-for="n in 10" :class="`Star s${n}`" :key="n"></div>
+      <div v-for="n in 10" :class="`Star Star-s${n}`" :key="n"></div>
     </div>
   </v-container>
 </template>
@@ -127,6 +127,7 @@ export default {
         }
         this.toogleInputs()
         await this.setUser(obj)
+        this.$router.push('/')
       } catch (error) {
         this.errorMsg = 'Credenciales invalidas'
       } finally {
@@ -157,16 +158,15 @@ export default {
 @import '@/scss/styles.scss';
 
 .Login {
+  position: relative;
   width: 400px;
   overflow: hidden;
   box-shadow: $shadow-large;
   @extend %card-aomine;
+  z-index: 5;
   @include desktop($bp-sm) {
-    box-shadow: none;
+    /* box-shadow: none; */
   }
-  /* &-card {
-    background-color: $bg !important;
-  } */
   &-title {
     color: #212121;
     opacity: .9;
@@ -184,6 +184,7 @@ export default {
   left: 20px;
   opacity: .45;
   transition: .3s;
+  z-index: 5;
   &:hover {
     opacity: .7;
   }
@@ -223,40 +224,40 @@ export default {
       animation: fuel 5s linear infinite;
       z-index: 3;
       @keyframes fuel {
-        0%{
+        0% {
           background-color: #2196F3;
           transform: rotate(45deg) scaleY(1);
         }
-        25%{
+        25% {
           background-color: #FFEB3B;
         }
-        50%{
+        50% {
           background-color: #607D8B;
           transform: rotate(45deg) scaleY(1.5);
         }
-        75%{
+        75% {
           background-color: #03A9F4;
         }
-        100%{
+        100% {
           background-color: #2196F3;
           transform: rotate(45deg) scaleY(1);
         }
       }
     }
     @keyframes fis {
-      0%{
+      0% {
         transform: translate(-15px, -15px);
       }
-      25%{
+      25% {
         transform: translate(15px, 0);
       }
-      50%{
+      50% {
         transform: translate(-15px, 15px);
       }
-      75%{
+      75% {
         transform: translate(15px, 0);
       }
-      100%{
+      100% {
         transform: translate(-15px, -15px);
       }
     }
@@ -276,7 +277,8 @@ export default {
     width: 300px;
     height: 300px;
     transform: translate(-35%, -35%) rotate(180deg);
-    z-index: 1;
+    pointer-events: none;
+    z-index: 6;
   }
   &-wave {
     background-image: url('../assets/login/waves3.svg');
@@ -288,89 +290,90 @@ export default {
     animation: waves 1.5s infinite linear;
     transform: translate(-110px, 10px) rotate(-45deg);
     @keyframes waves {
-      from{
+      from {
         background-position: 0;
       }
-      to{
+      to {
         background-position: -175px;
       }
     }
   }
 }
 .Star {
-	width: 2px;
-	height: 2px;
-	background: #fff;
-	position: absolute;
-	border-radius: 50%;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  position: absolute;
+  border-radius: 50%;
   transition: 0.5s;
   z-index: 2;
+  &-s1 {
+    top: 20%;
+    left: 50%;
+  }
+  &-s2 {
+    top: 30%;
+    left: 30%;
+  }
+  &-s3 {
+    top: 90%;
+    left: 90%;
+  }
+  &-s4 {
+    top: 80%;
+    left: 20%;
+  }
+  &-s5 {
+    top: 0%;
+    left: 85%;
+  }
+  &-s6 {
+    top: 70%;
+    left: 80%;
+  }
+  &-s7 {
+    top: 30%;
+    left: 75%;
+  }
+  &-s8 {
+    top: 80%;
+    left: 50%;
+  }
+  &-s9 {
+    top: 35%;
+    left: 10%;
+  }
+  &-s10 {
+    top: 60%;
+    left: 20%;
+  }
+  &-s11 {
+    top: 42%;
+    left: 50%;
+  }
+  &:nth-child(2n) {
+    animation: star-p 5s infinite;
+  }
+  &:nth-child(2n + 1) {
+    animation: star-i 5s infinite;
+    animation-delay: 5s;
+  }
 }
-.s1 {
-	top: 20%;
-	left: 50%;
-}
-.s2 {
-	top: 30%;
-	left: 30%;
-}
-.s3 {
-	top: 90%;
-	left: 90%;
-}
-.s4 {
-	top: 80%;
-	left: 20%;
-}
-.s5 {
-	top: 0%;
-	left: 85%;
-}
-.s6 {
-	top: 70%;
-	left: 80%;
-}
-.s7 {
-	top: 30%;
-	left: 75%;
-}
-.s8 {
-	top: 80%;
-	left: 50%;
-}
-.s9 {
-	top: 35%;
-	left: 10%;
-}
-.s10 {
-	top: 60%;
-	left: 20%;
-}
-.s11 {
-	top: 42%;
-	left: 50%;
-}
-.Star:nth-child(2n) {
-	animation: star-p 5s infinite;
-}
-.Star:nth-child(2n + 1) {
-  animation: star-i 5s infinite;
-  animation-delay: 5s;
-}
+
 @keyframes star-p {
-	0%, 35%, 50%{
-		box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.3);
-	}
-	45%{
-		box-shadow: 0 0 2px 2px rgba(255, 255, 255, 0.3);
-	}
+  0%, 35%, 50% {
+    box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.3);
+  }
+  45% {
+    box-shadow: 0 0 2px 2px rgba(255, 255, 255, 0.3);
+  }
 }
 @keyframes star-i {
-	0%, 35%, 50%{
-		box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.3);
-	}
-	45%{
-		box-shadow: 0 0 2px 2px rgba(255, 255, 255, 0.3);
-	}
+  0%, 35%, 50% {
+    box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.3);
+  }
+  45% {
+    box-shadow: 0 0 2px 2px rgba(255, 255, 255, 0.3);
+  }
 }
 </style>

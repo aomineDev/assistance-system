@@ -1,7 +1,9 @@
 <template>
   <div>
     <navbar />
-    <sidenav />
+    <template v-if="$vuetify.breakpoint.xsOnly">
+      <sidenav />
+    </template>
     <v-content>
       <transition name="fade-page">
         <router-view />

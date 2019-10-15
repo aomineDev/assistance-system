@@ -14,17 +14,105 @@ class AsistenciaController extends Controller
         ->orderBy('fecha')
         ->get();
 
+        $user = auth()->user();
+        $rol = $user->rol;
+        $persona = $user->persona;
+        $estudiante = [];
+        $docente = [];
         $allAsistencias = [];
-        foreach($asistencias as $item) {
-            $curso = $item->curso;
-            $semestre = $curso->semestre;
-            $response = [
-                'id' => $item->id,
-                'curso' => $curso->nombre,
-                'fecha' => $item->fecha
-            ];
-            array_push($allAsistencias, $response);
+
+        if ($rol->nombre === 'estudiante') {
+            $estudiante = $persona->estudiante;
+
+            foreach($asistencias as $item) {
+                $curso = $item->curso;
+                $estudiantes = $item->estudiantes;
+                $estudianteFilter = [];
+
+                foreach($estudiantes as $element) {
+                    if($element->estudiante_id === $estudiante->id) {
+                        $estudianteFilter = $element;
+                    }
+                }
+
+                $response = [
+                    'id' => $item->id,
+                    'habilitado' => $item->habilitado,
+                    'curso_id' => $curso->id,
+                    'curso' => $curso->nombre,
+                    'fecha' => $item->fecha,
+                    'estudiante' => [
+                        'estudiante_id' => $estudianteFilter->estudiante_id,
+                        'firma' => $estudianteFilter->firma
+                    ]
+                ];
+                array_push($allAsistencias, $response);
+            }
         }
+
+        if ($rol->nombre === 'docente') {
+
+            foreach($asistencias as $item) {
+                $curso = $item->curso;
+
+                $response = [
+                    'id' => $item->id,
+                    'habilitado' => $item->habilitado,
+                    'curso_id' => $curso->id,
+                    'curso' => $curso->nombre,
+                    'fecha' => $item->fecha
+                ];
+                array_push($allAsistencias, $response);
+            }
+        }
+
+        return $allAsistencias;
+    }
+
+    public function getAsistenciasByEstudiantes($curso_id, $docente_id) {
+        $asistencias = Asistencia::where('curso_id', $curso_id)
+        ->where('docente_id', $docente_id)
+        ->orderBy('fecha')
+        ->get();
+
+        $user = auth()->user();
+        $rol = $user->rol;
+
+        $allAsistencias = [];
+
+        if ($rol->nombre === 'docente') {
+            foreach($asistencias as $item) {
+                $curso = $item->curso;
+                $estudiantes = $item->estudiantes;
+                $estudianteArr =[];
+
+                foreach($estudiantes as $element) {
+                    $estudiante = $element->estudiante;
+                    $persona = $estudiante->persona;
+                    $res = [
+                        'estudiante_id' => $element->estudiante_id,
+                        'nombre' => $persona->nombre_completo,
+                        'codigo' => $estudiante->codigo,
+                        'firma' => $element->firma
+                    ];
+
+                    array_push($estudianteArr, $res);
+                }
+
+                usort($estudianteArr, function($a, $b) {
+                    return strcmp($a['nombre'], $b['nombre']);
+                });
+
+                $response = [
+                    'id' => $item->id,
+                    'curso_id' => $curso->id,
+                    'curso' => $curso->nombre,
+                    'estudiantes' => $estudianteArr
+                ];
+                array_push($allAsistencias, $response);
+            }
+        }
+
         return $allAsistencias;
     }
 
@@ -46,7 +134,9 @@ class AsistenciaController extends Controller
             'software' => $asistencia->software,
             'avance' => $asistencia->avance,
             'fecha' => $asistencia->fecha,
-            'proyector' => $asistencia->proyector
+            'proyector' => $asistencia->proyector,
+            'habilitado' => $asistencia->habilitado,
+            'laboratorio' => $curso->laboratorio
         ];
 
         $allEstudiantes = [];
@@ -55,6 +145,7 @@ class AsistenciaController extends Controller
             $estudiante = $item->estudiante;
             $responseOne = [
                 'id' => $item->id,
+                'estudiante_id' => $estudiante->id,
                 'nombre' => $estudiante->persona->nombre_completo,
                 'codigo' => $estudiante->codigo,
                 'firma' => $item->firma,
@@ -62,6 +153,7 @@ class AsistenciaController extends Controller
             ];
             $responseTwo = [
                 'id' => $item->id,
+                'estudiante_id' => $estudiante->id,
                 'firma' => $item->firma,
                 'nota' => $item->nota
             ];
@@ -91,15 +183,14 @@ class AsistenciaController extends Controller
         $asistencia->proyector = $request->input('proyector');
         $asistencia->save();
 
-        // $details = [
-        //     'aula' => $asistencia->aula,
-        //     'tema' => $asistencia->tema,
-        //     'software' => $asistencia->software,
-        //     'avance' => $asistencia->avance,
-        //     'fecha' => $asistencia->fecha,
-        //     'proyector' => $asistencia->proyector
-        // ];
+        return $asistencia;
+    }
 
-        return $request;
+    public function enabledToggle(Request $request, $id) {
+        $asistencia = Asistencia::find($id);
+        $asistencia->habilitado = $request->habilitado;
+        $asistencia->save();
+
+        return $asistencia;
     }
 }

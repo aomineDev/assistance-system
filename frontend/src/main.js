@@ -10,9 +10,11 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 
 import formatDate from './filters/formatDate'
+import getIndex from './filters/getIndex'
 
 Vue.use(VueAxios, axios)
 Vue.use(formatDate)
+Vue.use(getIndex)
 
 Vue.config.productionTip = false
 

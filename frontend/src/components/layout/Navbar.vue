@@ -1,57 +1,84 @@
 <template>
   <div>
     <v-app-bar color="deep-purple" dark app>
-      <v-app-bar-nav-icon @click.stop="drawerMutation(true)"></v-app-bar-nav-icon>
-      <v-toolbar-title>Control de asistencia</v-toolbar-title>
+      <v-app-bar-nav-icon
+        class="d-flex d-sm-none"
+        @click.stop="drawerMutation(true)"
+      ></v-app-bar-nav-icon>
+      <div class="flex-grow-1 d-flex d-sm-none"></div>
+      <v-toolbar-title>Control de asistencias</v-toolbar-title>
+      <img src="@/assets/login/fis.svg" alt="fis logo" class="Navbar-logo">
       <div class="flex-grow-1"></div>
 
-      <v-toolbar-items>
-        <v-btn icon @click="notifications++">
-          <v-badge
-            overlap
-            v-model="show"
-          >
-            <template v-slot:badge>{{ notifications }}</template>
-            <v-icon>notifications</v-icon>
-          </v-badge>
+      <v-toolbar-items  class="d-none d-sm-flex">
+        <v-btn
+          text
+          :to="{name: 'cursos'}"
+        >
+          Cursos
         </v-btn>
 
-        <v-btn icon @click="decrement">
-          <v-icon>person</v-icon>
-        </v-btn>
+        <v-menu
+          bottom
+          origin="center center"
+          transition="scale-transition"
+          offset-y
+        >
+            <template v-slot:activator="{ on }">
+              <v-btn
+                icon
+                v-on="on"
+              >
+                <v-icon>person</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list>
+              <v-list-item
+              >
+                <v-list-item-title>Pefil</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="logoutAndGoToLogin"
+              >
+                <v-list-item-title>Logout</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
       </v-toolbar-items>
     </v-app-bar>
+    <v-overlay
+      opacity="0"
+      :value="overlay"
+    />
   </div>
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
-  data () {
-    return {
-      notifications: 0,
-      show: false
-    }
-  },
   methods: {
-    decrement () {
-      if (this.notifications !== 0) {
-        this.notifications--
-      }
+    async logoutAndGoToLogin () {
+      this.overlayMutation(!this.overlay)
+      await this.logout(true)
+      this.overlayMutation(!this.overlay)
+      this.$router.push({ name: 'login' })
     },
-    ...mapMutations(['drawerMutation'])
+    ...mapActions(['logout']),
+    ...mapMutations(['drawerMutation', 'overlayMutation'])
   },
-  watch: {
-    notifications (value) {
-      if (value) {
-        this.show = true
-      }
-
-      if (value === 0) {
-        this.show = false
-      }
-    }
+  computed: {
+    ...mapState(['overlay'])
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.Navbar {
+  &-logo {
+    width: 32px;
+    transform: translateX(8px)
+  }
+}
+</style>

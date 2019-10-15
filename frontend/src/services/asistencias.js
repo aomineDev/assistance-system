@@ -5,7 +5,10 @@ const asistenciasService = {
     return service.get(`/cursos/${id}`)
   },
   getAsistencias: (cursoId, docenteId) => {
-    return service.get(`/asistencias/${cursoId}/${docenteId}`)
+    return service.get(`/asistencias/curso/${cursoId}/${docenteId}`)
+  },
+  getPorcentajes: (cursoId, docenteId) => {
+    return service.get(`/asistencias/estudiante/${cursoId}/${docenteId}`)
   },
   getAsitencia: id => {
     return service.get(`/asistencia/${id}`)
@@ -23,6 +26,16 @@ const asistenciasService = {
   },
   updateAsistencias: (firmas, id) => {
     return service.put(`/firmas/update/${id}`, firmas)
+  },
+  enabledToggle: (value, id) => {
+    return service.put(`/details/habilitar/${id}`, {
+      habilitado: value
+    })
+  },
+  updateAsistencia: (firma, id) => {
+    return service.put(`/firma/update/${id}`, {
+      firma
+    })
   }
 }
 

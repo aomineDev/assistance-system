@@ -67,12 +67,38 @@ class AuthController extends Controller
 
 	public function me() {
         $user = auth()->user();
+        $persona = $user->persona;
+        $rol = $user->rol;
+
+        if ($user->rol->nombre === 'admin') {
+            return response()->json([
+                'id' => $user->id,
+                'email' => $user->email,
+                'nombre' => $persona->nombre_completo,
+                'rol' => $rol->nombre
+            ]);
+        }
+
+        if ($user->rol->nombre === 'estudiante') {
+            $estudiante = $persona->estudiante;
+
+            return response()->json([
+                'id' => $user->id,
+                'email' => $user->email,
+                'estudiante_id' => $estudiante->id,
+                'nombre' => $persona->nombre_completo,
+                'rol' => $rol->nombre
+            ]);
+        }
+
+        $docente = $persona->docente;
+
 		return response()->json([
             'id' => $user->id,
-            'persona_id' => $user->persona->id,
-            'nombre' => $user->persona->nombre_completo,
-            'rol' => $user->rol->nombre,
-            'email' => $user->email
+            'email' => $user->email,
+            'nombre' => $persona->nombre_completo,
+            'docente_id' => $docente->id,
+            'rol' => $rol->nombre
         ]);
     }
 
@@ -80,14 +106,44 @@ class AuthController extends Controller
     {
         $user = auth()->user();
 
-        return response()->json([
+        $persona = $user->persona;
+        $rol = $user->rol;
+
+        if ($rol->nombre === 'admin') {
+            return response()->json([
+                'id' => $user->id,
+                'email' => $user->email,
+                'nombre' => $persona->nombre_completo,
+                'rol' => $rol->nombre,
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60
+            ]);
+        }
+
+        if ($rol->nombre === 'estudiante') {
+            $estudiante = $persona->estudiante;
+
+            return response()->json([
+                'id' => $user->id,
+                'email' => $user->email,
+                'estudiante_id' => $estudiante->id,
+                'nombre' => $persona->nombre_completo,
+                'rol' => $rol->nombre,
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60
+            ]);
+        }
+
+        $docente = $persona->docente;
+
+		return response()->json([
             'id' => $user->id,
-            'persona_id' => $user->persona->id,
-            'nombre' => $user->persona->nombre_completo,
-            'rol' => $user->rol->nombre,
             'email' => $user->email,
-            'access_token' => $token,
-            'token_type' => 'bearer',
+            'nombre' => $persona->nombre_completo,
+            'docente_id' => $docente->id,
+            'rol' => $rol->nombre,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60

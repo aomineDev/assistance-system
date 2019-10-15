@@ -7,7 +7,7 @@ use App\EstudianteAsistencia;
 
 class EstudianteAsistenciaController extends Controller
 {
-    public function updateAsistencia(Request $request, $id) {
+    public function updateAsistencias(Request $request, $id) {
         $asistencias =EstudianteAsistencia::where('asistencia_id', $id)->get();
 
         foreach($asistencias as $index => $item) {
@@ -16,5 +16,12 @@ class EstudianteAsistenciaController extends Controller
         }
 
         return $asistencias;
+    }
+
+    public function updateAsistencia(Request $request, $id) {
+        $asistencia = EstudianteAsistencia::find($id);
+        $asistencia->firma = $request->firma;
+        $asistencia->save();
+        return $asistencia;
     }
 }

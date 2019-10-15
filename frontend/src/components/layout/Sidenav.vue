@@ -8,15 +8,15 @@
       <div class="Sidenav-brightness"></div>
         <v-row align="end" class="white--text pa-2 fill-height">
           <v-col>
-            <v-avatar color="blue" size="48" class="mb-1">
-                <v-icon dark>person</v-icon>
+            <v-avatar color="deep-purple" size="48" class="mb-1">
+                <v-icon dark>ac_unit</v-icon>
                 <!-- <img
                   src="https://cdn.vuetifyjs.com/images/john.jpg"
                   alt="John"
                 > -->
               </v-avatar>
-            <div class="subheading">Jonathan Lee</div>
-            <div class="body-1">aomine@gmail.com</div>
+            <div class="subheading">{{ user.nombre }}</div>
+            <div class="body-1">{{ user.email }}</div>
           </v-col>
         </v-row>
       </v-img>
@@ -26,8 +26,9 @@
       >
         <v-list-item-group
           v-model="group"
-          active-class="deep-purple--text text--accent-4"
+          active-class="deep-purple--text"
         >
+
           <v-list-item :to="{name: 'cursos'}">
             <v-list-item-icon>
             <v-icon>book</v-icon>
@@ -37,13 +38,34 @@
             <v-list-item-title>Cursos</v-list-item-title>
           </v-list-item-content>
           </v-list-item>
+
+          <v-list-item  :to="{name: 'login'}">
+            <v-list-item-icon>
+            <v-icon>person</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Perfil</v-list-item-title>
+          </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="logoutAndGoToLogin">
+            <v-list-item-icon>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item-content>
+          </v-list-item>
+
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   data () {
@@ -52,10 +74,17 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['drawerMutation'])
+    async logoutAndGoToLogin () {
+      this.overlayMutation(true)
+      await this.logout(true)
+      this.overlayMutation(false)
+      this.$router.push({ name: 'login' })
+    },
+    ...mapActions(['logout']),
+    ...mapMutations(['drawerMutation', 'overlayMutation'])
   },
   computed: {
-    ...mapState(['drawerState']),
+    ...mapState(['drawerState', 'user']),
     drawer: {
       get () {
         return this.drawerState
